@@ -8,12 +8,9 @@ Architecture = %x[uname -i].strip
 Date         = %x[date +"%m%d%y_%H%M%S"].strip
 Output_File  = "#{Date}_run.csv"
 
-SMT          = [ "2", "4", "8" ] 
-#Num_Reqs     = [ "1000", "10000", "100000", "1000000" ]
-#Num_Clients  = [ "50", "100", "200", "500" ]
-
-Num_Reqs     = [ "1000", "10000" ]
-Num_Clients  = [ "50", "100" ]
+SMT          = [ "off", "2", "4", "8" ] 
+Num_Reqs     = [ "1000", "10000", "100000" ]
+Num_Clients  = [ "25", "50", "100" ]
 
 #############
 # Functions #
@@ -68,7 +65,11 @@ if %x[which redis-benchmark 2>/dev/null].strip == ""
   exit 1
 end
 
+
 if Architecture == "ppc64le"
+
+  # Grab the current SMT version so we can set it back to what it was
+  original_smt = %x[ppc64_cpu --smt].split("=").last
 
   # Run tests for Power Linux"
   printf "*Running benchmarks for Power Linux*\n"
@@ -94,6 +95,9 @@ if Architecture == "ppc64le"
       end
     end
   end
+
+  # Set back to current SMT
+  activate_smt(original_smt)
   
 elsif Architecture == "x86_64"
   
